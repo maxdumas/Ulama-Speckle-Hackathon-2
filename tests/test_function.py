@@ -1,17 +1,15 @@
 """Run integration tests with a speckle server."""
 
 from pydantic import SecretStr
-
 from speckle_automate import (
     AutomationContext,
     AutomationRunData,
     AutomationStatus,
     run_function,
 )
+from speckle_automate.fixtures import *
 
 from main import FunctionInputs, automate_function
-
-from speckle_automate.fixtures import *
 
 
 def test_function_run(

@@ -51,7 +51,8 @@ def automate_function(
     objects_of_desired_family_name = [
         b
         for b in flatten_base(version_root_object)
-        if b["parameters"]["Normalized Family Name"] == "TOILET"
+        if "Normalized Family Name" in b["parameters"]
+        and b["parameters"]["Normalized Family Name"] == "TOILET"
     ]
     count = len(objects_of_desired_family_name)
 
