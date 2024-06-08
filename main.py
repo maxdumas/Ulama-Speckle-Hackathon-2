@@ -1,9 +1,9 @@
 """This module contains the business logic of the function.
 
-Use the automation_context module to wrap your function in an Autamate context helper
+Use the automation_context module to wrap your function in an Automate context helper
 """
 
-from pydantic import Field, SecretStr
+# from pydantic import Field, SecretStr
 from speckle_automate import (
     AutomateBase,
     AutomationContext,
@@ -21,15 +21,15 @@ class FunctionInputs(AutomateBase):
     https://docs.pydantic.dev/latest/usage/models/
     """
 
-    # an example how to use secret values
-    whisper_message: SecretStr = Field(title="This is a secret message")
-    forbidden_speckle_type: str = Field(
-        title="Forbidden speckle type",
-        description=(
-            "If a object has the following speckle_type,"
-            " it will be marked with an error."
-        ),
-    )
+    # # an example how to use secret values
+    # whisper_message: SecretStr = Field(title="This is a secret message")
+    # forbidden_speckle_type: str = Field(
+    #     title="Forbidden speckle type",
+    #     description=(
+    #         "If a object has the following speckle_type,"
+    #         " it will be marked with an error."
+    #     ),
+    # )
 
 
 def automate_function(
@@ -45,29 +45,26 @@ def automate_function(
             It also has conveniece methods attach result data to the Speckle model.
         function_inputs: An instance object matching the defined schema.
     """
-    # the context provides a conveniet way, to receive the triggering version
+    # the context provides a convenient way, to receive the triggering version
     version_root_object = automate_context.receive_version()
 
-    objects_with_forbidden_speckle_type = [
+    objects_of_desired_family_name = [
         b
         for b in flatten_base(version_root_object)
-        if b.speckle_type == function_inputs.forbidden_speckle_type
+        if b["parameters"]["Normalized Family Name"] == "TOILET"
     ]
-    count = len(objects_with_forbidden_speckle_type)
+    count = len(objects_of_desired_family_name)
 
-    if count > 0:
+    if count == 0:
         # this is how a run is marked with a failure cause
-        automate_context.attach_error_to_objects(
-            category="Forbidden speckle_type"
-            f" ({function_inputs.forbidden_speckle_type})",
-            object_ids=[o.id for o in objects_with_forbidden_speckle_type if o.id],
-            message="This project should not contain the type: "
-            f"{function_inputs.forbidden_speckle_type}",
-        )
+        # automate_context.attach_error_to_objects(
+        #     category="No toilets found",
+        #     object_ids=[o.id for o in objects_of_desired_family_name if o.id],
+        #     message="This project should not contain the type: "
+        #     f"{function_inputs.forbidden_speckle_type}",
+        # )
         automate_context.mark_run_failed(
-            "Automation failed: "
-            f"Found {count} object that have one of the forbidden speckle types: "
-            f"{function_inputs.forbidden_speckle_type}"
+            "Automation failed: Found no toilets",
         )
 
         # set the automation context view, to the original model / version view
@@ -75,7 +72,7 @@ def automate_function(
         automate_context.set_context_view()
 
     else:
-        automate_context.mark_run_success("No forbidden types found.")
+        automate_context.mark_run_success("{count} toilets found.")
 
     # if the function generates file results, this is how it can be
     # attached to the Speckle project / model
